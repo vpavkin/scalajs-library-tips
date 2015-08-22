@@ -11,8 +11,10 @@ import scala.scalajs.js.JSConverters._
 
 object promise {
   implicit class JSFutureOps[R: ClassTag, E: ClassTag](f: Future[\/[E, R]]) {
-    def toPromise(recovery: Throwable => js.Any)(implicit ectx: ExecutionContext): Promise[R] =
-      new Promise[R]((resolve: js.Function1[R, Unit], reject: js.Function1[js.Any, Unit]) => {
+    def toPromise(recovery: Throwable => js.Any)
+                 (implicit ectx: ExecutionContext): Promise[R] =
+      new Promise[R]((resolve: js.Function1[R, Any],
+                      reject: js.Function1[js.Any, Any]) => {
         f.onSuccess({
           case \/-(f: R) => resolve(f)
           case -\/(e: E) => reject(e.asInstanceOf[js.Any])
