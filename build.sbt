@@ -3,7 +3,6 @@ enablePlugins(ScalaJSPlugin)
 name := "scala-js-library-tips"
 
 libraryDependencies ++= Seq(
-  "com.chuusai" % "shapeless_sjs0.6_2.11" % "2.2.4",
   "com.github.japgolly.fork.scalaz" %%% "scalaz-core" % "7.1.2",
   "org.scala-js" %%% "scalajs-dom" % "0.8.1"
 )
