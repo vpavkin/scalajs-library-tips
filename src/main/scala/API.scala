@@ -16,35 +16,18 @@ object API {
                      forks: Int,
                      fork: Boolean)
 
-  private val BASE_URL: String = "https://api.github.com"
+  def user(login: String)
+          (implicit ec: ExecutionContext): Future[String \/ UserDTO] =
+    load(login, s"$BASE_URL/users/$login", jsonToUserDTO)
 
-  // JSON deserialization is implemented manually for simplification
-  // In real project it's wiser to use a library,
-  // or implement type class derivations with shapeless
+  def repos(login: String)
+           (implicit ec: ExecutionContext): Future[String \/ List[RepoDTO]] =
+    load(login, s"$BASE_URL/users/$login/repos", arrayToRepos)
 
-  private def jsonToUserDTO(json: js.Any): Option[UserDTO] = Try {
-    val o: Map[String, js.Any] = json.asInstanceOf[js.Dictionary[js.Any]].toMap
-    Some(UserDTO(o("name").toString, o("avatar_url").toString))
-  }.getOrElse(None)
-
-  private def arrayToRepos(json: js.Any): Option[List[RepoDTO]] = Try {
-    val list = json.asInstanceOf[js.Array[js.Any]].toList
-    list.map(jsonToRepoDTO).sequenceU
-  }.getOrElse(None)
-
-  private def jsonToRepoDTO(json: js.Any): Option[RepoDTO] = Try {
-    val o: Map[String, js.Any] = json.asInstanceOf[js.Dictionary[js.Any]].toMap
-    Some(RepoDTO(
-      o("name").toString,
-      o("description").toString,
-      o("stargazers_count").asInstanceOf[Int],
-      Option(o("homepage")).map(_.toString),
-      o("forks_count").asInstanceOf[Int],
-      o("fork").asInstanceOf[Boolean]
-    ))
-  }.getOrElse(None)
-
-  private def load[T](login: String, url: String, parser: js.Any => Option[T])(implicit ec: ExecutionContext): Future[String \/ T] =
+  private def load[T](login: String,
+                      url: String,
+                      parser: js.Any => Option[T])
+                     (implicit ec: ExecutionContext): Future[String \/ T] =
     if (login.isEmpty)
       Future.successful("Error: login can't be empty".left)
     else
@@ -58,9 +41,35 @@ object API {
         }
       )
 
-  def user(login: String)(implicit ec: ExecutionContext): Future[String \/ UserDTO] =
-    load(login, s"$BASE_URL/users/$login", jsonToUserDTO)
+  private val BASE_URL: String = "https://api.github.com"
 
-  def repos(login: String)(implicit ec: ExecutionContext): Future[String \/ List[RepoDTO]] =
-    load(login, s"$BASE_URL/users/$login/repos", arrayToRepos)
+  // JSON deserialization is implemented manually for simplification
+  // In real project it's wiser to use a library,
+  // or implement type class derivations with shapeless
+
+  private def jsonToRepoDTO(json: js.Any): Option[RepoDTO] = Try {
+    val o: Map[String, js.Any] = json.asInstanceOf[js.Dictionary[js.Any]].toMap
+    Some(RepoDTO(
+      Option(o("name")).map(_.toString).getOrElse(""),
+      Option(o("description")).map(_.toString).getOrElse(""),
+      o("stargazers_count").asInstanceOf[Int],
+      Option(o("homepage")).map(_.toString),
+      o("forks_count").asInstanceOf[Int],
+      o("fork").asInstanceOf[Boolean]
+    ))
+  }.getOrElse(None)
+
+
+  private def jsonToUserDTO(json: js.Any): Option[UserDTO] = Try {
+    val o: Map[String, js.Any] = json.asInstanceOf[js.Dictionary[js.Any]].toMap
+    Some(UserDTO(
+      Option(o("name")).map(_.toString).getOrElse(""),
+      Option(o("avatar_url")).map(_.toString).getOrElse("")
+    ))
+  }.getOrElse(None)
+
+  private def arrayToRepos(json: js.Any): Option[List[RepoDTO]] = Try {
+    val list = json.asInstanceOf[js.Array[js.Any]].toList
+    list.map(jsonToRepoDTO).sequenceU
+  }.getOrElse(None)
 }
