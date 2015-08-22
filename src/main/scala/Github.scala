@@ -1,4 +1,4 @@
-import lib.promise.Promise
+import lib.Promise
 import model.{User, Repo, Fork}
 import utils.TypeNameConstant
 import utils.promise._
@@ -42,7 +42,8 @@ object Github {
   @JSExport
   val Origin = new TypeNameConstant[model.Origin]
 
-  private def userFromDTO(dto: API.UserDTO, repos: List[API.RepoDTO]): User =
+  private def userFromDTO(dto: API.UserDTO,
+                          repos: List[API.RepoDTO]): User =
     model.User(dto.name, dto.avatar_url, repos.map(repoFromDTO))
 
   private def repoFromDTO(dto: API.RepoDTO): Repo = dto.fork match {

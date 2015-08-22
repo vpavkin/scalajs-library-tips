@@ -1,6 +1,6 @@
 package utils
 
-import lib.promise.Promise
+import lib.Promise
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect.ClassTag
