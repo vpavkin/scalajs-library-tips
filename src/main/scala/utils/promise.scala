@@ -1,27 +1,19 @@
 package utils
 
-import lib.Promise
+import cats.data.Xor
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect.ClassTag
-import scala.scalajs.js
-import scalaz._
-import Scalaz._
 import scala.scalajs.js.JSConverters._
+import scala.scalajs.js.{JavaScriptException, Promise}
 
 object promise {
-  implicit class JSFutureOps[R: ClassTag, E: ClassTag](f: Future[\/[E, R]]) {
-    def toPromise(recovery: Throwable => js.Any)
-                 (implicit ectx: ExecutionContext): Promise[R] =
-      new Promise[R]((resolve: js.Function1[R, Any],
-                      reject: js.Function1[js.Any, Any]) => {
-        f.onSuccess({
-          case \/-(f: R) => resolve(f)
-          case -\/(e: E) => reject(e.asInstanceOf[js.Any])
-        })
-        f.onFailure {
-          case e: Throwable => reject(recovery(e))
-        }
-      })
+  implicit class JSFutureOps[R: ClassTag](f: Future[Xor[String, R]]) {
+
+    def toPromise(implicit ectx: ExecutionContext): Promise[R] =
+      f.flatMap[R] {
+        case Xor.Right(res) => Future.successful(res)
+        case Xor.Left(str) => Future.failed(new JavaScriptException(str))
+      }.toJSPromise
   }
 }

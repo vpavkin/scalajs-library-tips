@@ -1,15 +1,14 @@
-import lib.Promise
-import model.{User, Repo, Fork}
+import model.{Fork, Repo, User}
 import utils.TypeNameConstant
-import utils.promise._
 
 import scala.concurrent.Future
-import scala.scalajs.js
-import scala.scalajs.js.annotation.{JSExportAll, JSExport}
-import scalaz._
-import Scalaz._
-
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+import scala.scalajs.js
+import scala.scalajs.js.Promise
+import scala.scalajs.js.annotation.JSExport
+import cats.data.{XorT, Xor}
+import cats.std.future._
+import utils.promise._
 
 @JSExport
 object Github {
@@ -27,15 +26,15 @@ object Github {
                  repos: js.Array[Repo]): User =
     model.User(name, avatarUrl, repos.toList)
 
-  def loadUser(login: String): Future[String \/ User] = {
+  def loadUser(login: String): Future[String Xor User] = {
     for {
-      userDTO <- EitherT(API.user(login))
-      repoDTO <- EitherT(API.repos(login))
+      userDTO <- XorT(API.user(login))
+      repoDTO <- XorT(API.repos(login))
     } yield userFromDTO(userDTO, repoDTO)
-  }.run
+  }.value
 
   @JSExport("loadUser")
-  def loadUserJS(login: String): Promise[User] = loadUser(login).toPromise(_.getMessage)
+  def loadUserJS(login: String): Promise[User] = loadUser(login).toPromise
 
   @JSExport
   val Fork = new TypeNameConstant[model.Fork]
