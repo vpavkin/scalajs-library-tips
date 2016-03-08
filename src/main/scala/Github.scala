@@ -34,7 +34,7 @@ object Github {
   }.value
 
   @JSExport("loadUser")
-  def loadUserJS(login: String): Promise[User] = loadUser(login).toPromise(_.getMessage)
+  def loadUserJS(login: String): Promise[User] = loadUser(login).toPromise
 
   @JSExport
   val Fork = new TypeNameConstant[model.Fork]
