@@ -3,8 +3,8 @@ import org.scalajs.dom.ext.Ajax
 import scala.concurrent.{ExecutionContext, Future}
 import scala.scalajs.js
 import scala.util.Try
-import scalaz._
-import Scalaz._
+import cats.data.Xor
+import cats.implicits._
 
 object API {
 
@@ -17,17 +17,17 @@ object API {
                      fork: Boolean)
 
   def user(login: String)
-          (implicit ec: ExecutionContext): Future[String \/ UserDTO] =
+          (implicit ec: ExecutionContext): Future[String Xor UserDTO] =
     load(login, s"$BASE_URL/users/$login", jsonToUserDTO)
 
   def repos(login: String)
-           (implicit ec: ExecutionContext): Future[String \/ List[RepoDTO]] =
+           (implicit ec: ExecutionContext): Future[String Xor List[RepoDTO]] =
     load(login, s"$BASE_URL/users/$login/repos", arrayToRepos)
 
   private def load[T](login: String,
                       url: String,
                       parser: js.Any => Option[T])
-                     (implicit ec: ExecutionContext): Future[String \/ T] =
+                     (implicit ec: ExecutionContext): Future[String Xor T] =
     if (login.isEmpty)
       Future.successful("Error: login can't be empty".left)
     else

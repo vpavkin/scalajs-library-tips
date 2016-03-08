@@ -5,7 +5,7 @@ import utils.Typed
 import scala.annotation.meta.field
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters._
-import scala.scalajs.js.annotation.{JSExport, JSExportAll}
+import scala.scalajs.js.annotation.JSExport
 
 sealed trait Repo extends Typed {
   @JSExport
@@ -17,7 +17,7 @@ sealed trait Repo extends Typed {
   @JSExport
   def stargazersCount: Int
 
-  //leaving unfriendly value unexported
+  // leaving unfriendly value unexported
   def homepage: Option[String]
 
   @JSExport("homepage")
@@ -38,7 +38,7 @@ case class Origin(name: String,
 case class User(@(JSExport@field) name: String,
                 @(JSExport@field) avatarUrl: String,
                 repos: List[Repo]) {
-  
+
   @JSExport("repos")
   def reposJS: js.Array[Repo] = repos.toJSArray
 }

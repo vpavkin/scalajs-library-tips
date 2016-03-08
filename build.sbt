@@ -3,8 +3,8 @@ enablePlugins(ScalaJSPlugin)
 name := "scala-js-library-tips"
 
 libraryDependencies ++= Seq(
-  "com.github.japgolly.fork.scalaz" %%% "scalaz-core" % "7.1.2",
-  "org.scala-js" %%% "scalajs-dom" % "0.8.1"
+  "org.typelevel" %%% "cats-core" % "0.4.1",
+  "org.scala-js" %%% "scalajs-dom" % "0.9.0"
 )
 
 scalaVersion := "2.11.7"
